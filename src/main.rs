@@ -1,3 +1,6 @@
+#![allow(dead_code)]
+use std::fmt;
+
 #[derive(Clone)]
 enum Direction {
     Row,
@@ -44,17 +47,17 @@ enum Align {
 #[derive(Clone)]
 struct Spacing {
     top: f64,
-    left: f64,
+    start: f64,
     bottom: f64,
-    right: f64,
+    end: f64,
 }
 
 impl Spacing {
     fn all(value: f64) -> Self {
         Spacing {
             top: value,
-            left: value,
-            right: value,
+            start: value,
+            end: value,
             bottom: value,
         }
     }
@@ -62,26 +65,26 @@ impl Spacing {
     fn top(top: f64) -> Self {
         Spacing {
             top,
-            left: 0.0,
-            right: 0.0,
+            start: 0.0,
+            end: 0.0,
             bottom: 0.0,
         }
     }
 
-    fn left(left: f64) -> Self {
+    fn start(start: f64) -> Self {
         Spacing {
             top: 0.0,
-            left,
-            right: 0.0,
+            start,
+            end: 0.0,
             bottom: 0.0,
         }
     }
 
-    fn right(right: f64) -> Self {
+    fn end(end: f64) -> Self {
         Spacing {
             top: 0.0,
-            left: 0.0,
-            right,
+            start: 0.0,
+            end,
             bottom: 0.0,
         }
     }
@@ -89,19 +92,44 @@ impl Spacing {
     fn bottom(bottom: f64) -> Self {
         Spacing {
             top: 0.0,
-            left: 0.0,
-            right: 0.0,
+            start: 0.0,
+            end: 0.0,
             bottom,
         }
     }
 
-    fn tlrb(top: f64, left: f64, right: f64, bottom: f64) -> Self {
+    fn tseb(top: f64, start: f64, end: f64, bottom: f64) -> Self {
         Spacing {
             top,
-            left,
-            right,
+            start,
+            end,
             bottom,
         }
+    }
+}
+
+enum LayoutDirection {
+    Ltr,
+    Rtl,
+    Inherit,
+}
+
+struct Layout {
+    left: f64,
+    right: f64,
+    top: f64,
+    bottom: f64,
+    width: f64,
+    height: f64,
+}
+
+impl fmt::Display for Layout {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "Layout(left: {}, top: {}, width: {}, height: {})",
+            self.left, self.top, self.width, self.height
+        )
     }
 }
 
@@ -246,22 +274,25 @@ impl Node {
     }
 
     fn insert_child(mut self, child: Self) -> Self {
-        self.width += child.width;
-        self.height += child.height;
         self.children = Box::from([self.children, Box::from([child])].concat());
         self
     }
+
+    fn calculate_layout(self) -> Layout {
+        Layout {
+            left: 0.0,
+            right: 0.0,
+            top: 0.0,
+            bottom: 0.0,
+            height: 0.0,
+            width: 0.0,
+        }
+    }
 }
 
-impl std::fmt::Display for Node {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "Node({}x{}, children: {})",
-            self.width,
-            self.height,
-            self.children.len()
-        )
+impl fmt::Display for Node {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Node(children: {})", self.children.len())
     }
 }
 
