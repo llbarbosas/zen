@@ -1,7 +1,6 @@
-
-mod id;
-pub mod node;
+pub mod id;
 pub mod layout;
+pub mod node;
 
 #[cfg(test)]
 mod tests {

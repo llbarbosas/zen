@@ -1,11 +1,11 @@
 #![allow(dead_code)]
 
-use std::fmt;
 use crate::id;
+use std::fmt;
 
-static INSTANCE_ALLOCATOR: id::Allocator = id::Allocator::new();
+pub(crate) static INSTANCE_ALLOCATOR: id::Allocator = id::Allocator::new();
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub enum Direction {
     Row,
     Column,
@@ -13,20 +13,20 @@ pub enum Direction {
     ColumnReverse,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub enum Basis {
     Auto,
     Value(f32),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub enum Wrap {
     NoWrap,
     Wrap,
     WrapReverse,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub enum JustifyContent {
     FlexStart,
     FlexEnd,
@@ -36,7 +36,7 @@ pub enum JustifyContent {
     SpaceEvenly,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub enum Align {
     Auto,
     FlexStart,
@@ -48,7 +48,7 @@ pub enum Align {
     SpaceAround,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct Spacing {
     top: f64,
     start: f64,
@@ -112,8 +112,9 @@ impl Spacing {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct Node {
+    pub id: id::NodeId,
     direction: Direction,
     basis: Basis,
     grow: f32,
@@ -123,7 +124,7 @@ pub struct Node {
     align_items: Align,
     align_self: Align,
     align_content: Align,
-    width: f64,
+    pub width: f64,
     height: f64,
     max_width: f64,
     max_height: f64,
@@ -133,14 +134,12 @@ pub struct Node {
     padding: Spacing,
     margin: Spacing,
     border: Spacing,
-    children: Box<[Node]>,
 }
 
 impl Node {
     pub fn new() -> Node {
-        println!("{}", INSTANCE_ALLOCATOR.allocate());
-
         Node {
+            id: INSTANCE_ALLOCATOR.allocate(),
             direction: Direction::Row,
             basis: Basis::Auto,
             grow: 0.0,
@@ -160,7 +159,6 @@ impl Node {
             padding: Spacing::all(0.0),
             margin: Spacing::all(0.0),
             border: Spacing::all(0.0),
-            children: Box::from([]),
         }
     }
 
@@ -253,15 +251,10 @@ impl Node {
         self.border = border;
         self
     }
-
-    pub fn insert_child(mut self, child: Self) -> Self {
-        self.children = Box::from([self.children, Box::from([child])].concat());
-        self
-    }
 }
 
 impl fmt::Display for Node {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Node(children: {})", self.children.len())
+        write!(f, "Node({})", self.id)
     }
 }

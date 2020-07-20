@@ -1,10 +1,17 @@
+use zen::layout::RenderTree;
 use zen::node::Node;
+
 fn main() {
     let node1 = Node::new().width(100.0).height(100.0);
     let node2 = Node::new().width(300.0).height(400.0);
+    let root = Node::new();
 
-    let root = Node::new().insert_child(node1).insert_child(node2);
-    let layout = root.calculate_layout();
+    let tree = RenderTree::new().append_to(&root, &vec![node1, node2]);
+    tree.show();
 
-    println!("root: {}, {}", root, layout);
+    let node1 = node1.width(2.0);
+
+    tree.update(&node1).show();
+
+    println!("root: {}", root);
 }
